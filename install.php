@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ERROR);
+error_reporting(E_ALL);
 /*****
 
 Remember , script is under construction and not documented but the basics.
