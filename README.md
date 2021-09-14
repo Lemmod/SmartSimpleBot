@@ -3,7 +3,8 @@
 See the attached PDF's for more information
 
 
-# Donate?
+
+**Like the scripts?**
 
 All my scripts will be free to use , if you want to support me you can feel free to donate.
 
