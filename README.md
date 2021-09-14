@@ -6,7 +6,7 @@ See the attached PDF's for more information
 
 **Like the scripts?**
 
-All my scripts will be free to use , if you want to support me you can feel free to donate.
+All my scripts will be free to use , if you want to support me you feel free to donate!
 
 **USDT**
 
