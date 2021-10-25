@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+error_reporting(E_ERROR);
 /*****
 
 Remember , script is under construction and not documented but the basics.
@@ -17,18 +17,21 @@ $time = explode(' ', $time);
 $time = $time[1] + $time[0];
 $start = $time;
 
-include ('app/Config.php');
-include ('app/Core.php');
-include ('app/3CommasConnector.php');
-include ('app/DataMapper.php');
-include ('app/DataReader.php');
-include ('app/functions.php');
+include (__DIR__.'/app/Config.php');
+include (__DIR__.'/app/Core.php');
+include (__DIR__.'/app/3CommasConnector.php');
+include (__DIR__.'/app/DataMapper.php');
+include (__DIR__.'/app/DataReader.php');
+include (__DIR__.'/app/functions.php');
 
 $dataMapper = new DataMapper();
 $dataReader = new DataReader();
 
 $all_accounts = $dataReader->get_all_accounts();
 $unprocessed_alerts = $dataReader->get_unprocessed_alerts(MAX_TIME_TO_CHECK_ALERT);
+
+
+
 
 $total_alerts = count($unprocessed_alerts);
 $errors_3c = 0;
@@ -46,6 +49,8 @@ foreach($all_accounts as $account_wrapper) {
 
     $account_info = $dataReader->get_account_info($account_wrapper['bot_account_id']);
     $account_settings = $dataReader->get_account_settings($account_info['internal_account_id']);
+
+
 
     /**
      * 
@@ -69,7 +74,6 @@ foreach($all_accounts as $account_wrapper) {
         // Check if the current data belongs to the current account
         if($data['account_id'] == $account_wrapper['bot_account_id']) {
 
-
             // Only on first alert we need to setup 3Commas connection
             if ($processed_alerts == 1) {
                 $xcommas_main = new MC3Commas\threeCommas(BASE_URL , $account_info['api_key'] , $account_info['api_secret']);
@@ -81,8 +85,10 @@ foreach($all_accounts as $account_wrapper) {
                     $count_active_deals_on_3c = count($deals);
 
                     $active_deal_bot_ids = array();
+		    $active_deal_pairs = array();
                     foreach($deals as $deal) {
                         $active_deal_bot_ids[] = $deal['bot_id'];
+                        $active_deal_pairs[] = ['bot_id' => $deal['bot_id'] , 'pair' => $deal['pair']];
                     }
                 } catch (Exception $e) {
 
@@ -95,6 +101,7 @@ foreach($all_accounts as $account_wrapper) {
              */
             $dataMapper->update_alert($alert['input_id'] , date('Y-m-d H:i:s',time()));
             $processed_alerts++;
+
 
             /**
              * Get source information from JSON and check account info
@@ -124,6 +131,18 @@ foreach($all_accounts as $account_wrapper) {
                 continue; 
             }
 
+
+            /**
+             * 
+             * Disable bots / account on Smart Simple Bot (doesn't affect 3C bots / account)
+             * 
+             */
+            if($message == 'set_mode') {
+                $dataMapper->update_mode($account_info['internal_account_id'] , $data['value']);
+                $dataMapper->insert_log($data['account_id'] , 0 , '' , 'Bot updated via TV alert to mode: '.$data['value']);
+                continue; 
+            }
+
             /**
              * 
              * Open deals checker , sent to Telegram if hit
@@ -147,23 +166,68 @@ foreach($all_accounts as $account_wrapper) {
                 continue;
             }
 
+            // Update the status of an set time_frame for use with smart strategy
+            if($message == 'set_tf') {
+                $dataMapper->insert_timeframe_status($account_info['internal_account_id'] , $data['tf_id'] , $data['type']);
+                $dataMapper->insert_log($data['account_id'] , 0 , '' , 'Added status for '.$data['label'].' with type '.$data['type']);
+                continue;
+            }
+
             /**
              * 
              * Check if account is active , if not we can skip this record
              * 
              */
             if($account_settings['active'] == 0) {
-                echo 'Account disabled...';
+                $dataMapper->insert_log($data['account_id'] , $data['bot_id'] , $data['pair'] , 'Account disabled...');
                 continue;
             }
-        
+
+            /** 
+             * 
+             * Check if the alert is using the same mode as set
+             * 
+             */
+
+            // Check the alert mode , if not set we assume it's for all modes
+            $alert_mode = !isset($data['strategy_id']) ? 'all' : $data['strategy_id'];
+            // Check the account mode setting , if not set we assume it's set to all
+            $set_mode = $account_settings['strategy_id'] == '-1' ? 'all' : $account_settings['strategy_id'];
+
+            $alert_passed_mode = false;
+            if($alert_mode == 'all' || $set_mode == 'all') {
+                $alert_passed_mode = true;
+            } elseif ($set_mode == $alert_mode) {
+                $alert_passed_mode = true;
+            }
+
+            // If the alert doesn't get through the mode we stop this alert from further processing
+            if (!$alert_passed_mode) {
+                $set_mode_name = $dataReader->get_strategy_info($set_mode);
+                $alert_mode_name = $dataReader->get_strategy_info($alert_mode);
+
+                $dataMapper->insert_log($data['account_id'] , $data['bot_id'] , $data['pair'] , 'Alert not proccesed due different mode settings. Set : '.$set_mode_name['strategy_name']. ', Alert : '.$alert_mode_name['strategy_name']);
+                continue;
+            }
+            
             /**
              * 
              * 
              * Get deals on the current bot , first check if there isn't allready running an order , in that case we can skipe the rest
              * 
              */
-            if(in_array($data['bot_id'] , $active_deal_bot_ids )) {
+            // Check if the deal is allready running
+            $deal_running = false;
+
+            foreach ($active_deal_pairs as $adp) {
+                // If there is an active pair we assume the deal is allready running. Also check for "old" pair naming on 3c to prevent duplication
+                if ($adp['pair'] ==  $data['pair'] || $adp['pair'] == substr($data['pair'] , 0 , -4)) {
+                    $deal_running = true;
+                }
+            }
+
+            // If there is allready a deal (pair) running we can skip further logic. We won't open a 2nd deal
+            if($deal_running) {
 
                 $dataMapper->insert_log($data['account_id'] , $data['bot_id'] , $data['pair'] , 'Deal allready running');
 
@@ -178,13 +242,14 @@ foreach($all_accounts as $account_wrapper) {
                      * Create the deal on 3Commas
                     */ 
                     try {
-                        $xcommas_main->start_deal_on_bot($data['bot_id']);
+                        $xcommas_main->start_deal_on_bot($data['bot_id'] , ['pair' => $data['pair']]);
                         $dataMapper->insert_log($data['account_id'] , $data['bot_id'] , $data['pair'] , 'Deal added ( Active : '.($count_active_deals_on_3c + 1).' , Max : '.$account_settings['max_active_deals'].' )');
                         $calls_3c++;
 
                         $count_active_deals_on_3c++;
 
                     } catch (Exception $e) {
+                        echo ' > Pair : '.$data['pair'].PHP_EOL;
                         echo ' > Caught exception: '.$e->getMessage().'.'.PHP_EOL;
                     }
                 
@@ -208,7 +273,6 @@ foreach($all_accounts as $account_wrapper) {
     $xcommas_main = null;
 }
 
-
 /**
  * 
  * Used for debug
@@ -220,7 +284,7 @@ $time = $time[1] + $time[0];
 $finishtime = $time;
 $total_time = round(($finishtime - $start), 4);
 
-echo date('Y-m-d H:i:s').' script ran for '.$total_time.PHP_EOL;
+echo 'SSB - 3 Commas '.date('Y-m-d H:i:s').' script ran for '.$total_time.PHP_EOL;
 
 $dataMapper->insert_debug_log(basename(__FILE__) , $total_alerts , $errors_3c , $calls_3c , $total_time) ;
 

@@ -12,10 +12,10 @@ It won't contain all possibilitys from the 3c API , mainly used for updating mul
 (c) 2021 - MileCrypto (Lemmod)
 
 */
-include ('app/Config.php');
-include ('app/Core.php');
-include ('app/DataMapper.php');
-include ('app/functions.php');
+include (__DIR__.'/app/Config.php');
+include (__DIR__.'/app/Core.php');
+include (__DIR__.'/app/DataMapper.php');
+include (__DIR__.'/app/functions.php');
 
 $dataMapper = new DataMapper();
 
