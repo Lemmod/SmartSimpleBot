@@ -41,8 +41,6 @@ function json_cleaner($json, $assoc = false, $depth = 512, $options = 0) {
 
 }
 
-
-
 // Create a dropdown with an start and end for use with integers
 function create_dropdown_number($start , $end , $name , $class , $id , $current_value , $step_size = '1') {
 
@@ -66,8 +64,6 @@ function create_dropdown_number($start , $end , $name , $class , $id , $current_
 function create_dropdown_number_with_id($start , $end , $name , $class , $id , $current_value , $step_size = '1') {
 
     $html = '<select name="'.$name.'" id="'.$id.'" class="'.$class.'">';
-
-    
 
     for($x = $start; $x <= $end; $x += $step_size) {
 
@@ -98,13 +94,18 @@ function create_input_float($name , $class , $id , $current_value) {
 }
 
 // Create a dropdown with an array for options
-function create_dropdown_options($options , $name , $class , $id , $current_value) {
+function create_dropdown_options($options , $name , $class , $id , $current_value , $use_different_key = false) {
 
-    $html = '<select name="'.$name.'"  class="'.$class.'">';
+    $html = '<select name="'.$name.'" id="'.$id.'"  class="'.$class.'">';
 
-    foreach($options as $opt) {
-        $selected = ($opt == $current_value) ? 'selected' : '';
-        $html.= '<option value="'.$opt.'" '.$selected.'>'.$opt.'</option>';
+    foreach($options as $key => $opt) {
+        if (!$use_different_key) {
+            $selected = ($opt == $current_value) ? 'selected' : '';
+            $html.= '<option '.$class.' value="'.$opt.'" '.$selected.'>'.$opt.'</option>';
+        } else {
+            $selected = ($key == $current_value) ? 'selected' : '';
+            $html.= '<option '.$class.' value="'.$key.'" '.$selected.'>'.$opt.'</option>';
+        }
 
     }
 
@@ -114,6 +115,8 @@ function create_dropdown_options($options , $name , $class , $id , $current_valu
 }
 
 function check_credentials($user_id) {
+
+
     // Terminate if the user is nog logged in
     if ($user_id != $_SESSION['user_id']) {
         echo 'ERROR_NOT_LOGGED_IN';
@@ -133,6 +136,26 @@ function telegram($telegram_bot_id , $telegram_chat_id , $msg) {
     $result=file_get_contents($url,false,$context);
     
     return $result;
+}
+
+
+// Building the query string to look for the corresponding strategy with current time_frames
+function strat_query_builder($tf_data) {
+
+    $query_string_join = '';
+    $query_string_filter = '';
+    $x = 0;
+    $total = count($tf_data);
+    foreach ($tf_data as $key => $data) {
+        $query_string_join.= '(SELECT type FROM strategy_settings s'.$x.' WHERE s'.$x.'.combination_id = p.combination_id AND time_frame_id = '.$key.') AS tf_'.$key;
+        if ($x < ( $total -1 )) {
+            $query_string_join.= ',';
+        }
+        $query_string_filter.= ' AND tf_'.$key.' = "'.$data.'"';
+        $x++;
+    }
+
+    return ['join' => $query_string_join , 'filter' => $query_string_filter];
 }
 
 function pr($data) {

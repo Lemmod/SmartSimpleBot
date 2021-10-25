@@ -1,20 +1,14 @@
-What is Smart Simple Bot (SSB) ?
-
-For all new users , I've created an script that let you handle the simple bots (1 pair per bot) on 3C to act as an composite bot (multiple pairs per bot). The advantage of this is that you are able to run an set of Max active deals but still can enable multiple bots on your futures account. Here is how it works :
-
-- You set up SSB on your own webserver using PHP/MySQL. (Basic knowledge on how to setup a server is required or look for a provider who supports this)
-- You change the webhook and message for your tradingview alerts to match the messages from SSB
-- All alerts fired from TradingView will be parsed by the script and saved
-- Few seconds later all alerts will be processed. You can set this up with some TV alerts as well. Here is where the magic happens as it look if you don't exceed the Max active deals you've set in the script. If so it won't open a new deal and you are save and if there is an open position a deal is created. In this way its more versatile with less risk then enable a lot of bots on 3commas itself.
-- Within the script you can manage all your bots on the account
-
-There is a more detailed description / setup guide in the attachment.
-
 v0.6 - 2021-08-27
 
 - Added alert for quick change BO size
-- Update bot manager to use text input instead of limited dropdown
+- Update bot manager to use free input instead of dropdown
 - Added % function for BO/SO type additional to fixed ammount
-- You now can fire multiple messages in one alert. Simply add an + before the next message.
+- You now can fire multiple messages in one alert. Simply add an + before the next.
   - 1 message : {"account_id":xxxxxx,"bot_id":xxxxx,"pair":"USDT_ALICE"}
   - 2 or more messages : {"account_id":xxxxxx,"bot_id":xxxxx,"pair":"USDT_ALICE"} + {"account_id":xxxxxx,"bot_id":xxxxx,"pair":"USDT_BTC"}
+
+
+v0.7 - 2021-09-09
+
+- Set the logbook to check 1 day back instead of 7 to speed it
+- Added Disabled bot message to logbook

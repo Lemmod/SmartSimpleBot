@@ -52,7 +52,6 @@ class DataMapper extends Core
         catch (PDOExecption $e){
             echo $e->getMessage();
         }    
-
     }
 
     /**
@@ -109,13 +108,28 @@ class DataMapper extends Core
 
             $stmt = null;
 
-            $internal_account_id = $this->dbh->lastInsertId();
+            return $this->dbh->lastInsertId();
             
-            $stmt = $this->dbh->prepare("INSERT INTO account_settings (internal_account_id , max_active_deals , active) VALUES (:internal_account_id , :max_active_deals , :active)");
+          
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }    
+    }
+
+    /**
+     * insert_account settings
+     *
+     * @param  int $internal_account_id
+     * @return void
+     */
+    public function insert_account_settings($internal_account_id) {
+        
+        try{
+          
+            $stmt = $this->dbh->prepare("INSERT INTO account_settings (internal_account_id , max_active_deals , active) VALUES (:internal_account_id , '0' , '0')");
             $stmt->bindParam(':internal_account_id', $internal_account_id);
-            $stmt->bindValue (':max_active_deals', 0);
-            $stmt->bindValue (':active', 0);
-            $stmt->execute();
+            $exec = $stmt->execute();
   
             $stmt = null;
 
@@ -124,6 +138,271 @@ class DataMapper extends Core
             echo $e->getMessage();
         }    
     }
+
+
+    /**
+     * Add specific bot settings per strategy
+     */
+
+     public function insert_bot_strategy($strategy_id , $bot_id , $data) {
+
+        try{
+
+            $stmt = $this->dbh->prepare("INSERT INTO bot_settings (strategy_id , bot_id ,  label , value) VALUES (:strategy_id , :bot_id , :label , :value)");
+
+            foreach ($data as $label => $value) {
+                $stmt->bindParam(':strategy_id', $strategy_id);
+                $stmt->bindParam(':bot_id', $bot_id);
+                $stmt->bindParam(':label', $label);
+                $stmt->bindParam(':value', $value);
+                $stmt->execute();
+            }
+
+            $stmt = null;
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+     }
+
+     /**
+     * Add specific bot settings per strategy
+     */
+
+    public function insert_strategy($internal_account_id) {
+     
+        try{
+
+            $stmt = $this->dbh->prepare("INSERT INTO strategies (internal_account_id , strategy_name) VALUES (:internal_account_id , :strategy_name)");
+
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->bindValue(':strategy_name', 'new_strategy');
+            $stmt->execute();
+
+            $stmt = null;
+
+            return $this->dbh->lastInsertId();
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+     }
+
+    /**
+     * Add specific bot settings per strategy
+     */
+
+    public function insert_timeframe($internal_account_id) {
+     
+        try{
+
+            $stmt = $this->dbh->prepare("INSERT INTO time_frames (internal_account_id , label , description) VALUES (:internal_account_id , :label , :description)");
+
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->bindValue(':label', 'new_timeframe');
+            $stmt->bindValue(':description', 'A new description');
+            $stmt->execute();
+
+            $stmt = null;
+
+            return $this->dbh->lastInsertId();
+         
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+     }
+
+    /**
+     * Add specific bot settings per strategy
+     */
+
+    public function insert_timeframe_status($internal_account_id , $time_frame_id , $type) {
+     
+        try{
+
+            $stmt = $this->dbh->prepare("INSERT INTO time_frame_status (account_id , time_frame_id , type) VALUES (:internal_account_id , :time_frame_id , :type)");
+
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->bindParam(':type', $type);
+            $stmt->execute();
+
+            pr($stmt);
+
+            $stmt = null;
+         
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+     }
+
+    /**
+     * Add an timeframe to exestings settings
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function insert_strategy_settings_timeframe_id($time_frame_id , $internal_account_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("INSERT INTO strategy_settings (combination_id , strategy_id , time_frame_id , type)
+            SELECT DISTINCT combination_id , strategy_id , :time_frame_id , 'short' FROM strategy_settings WHERE strategy_id IN (SELECT strategy_id FROM strategies WHERE internal_account_id = :internal_account_id)");
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Add a new row to the matrix
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function insert_strategy_settings($internal_account_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("INSERT INTO strategy_settings (combination_id , strategy_id , time_frame_id , type)
+            SELECT (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings) + 1 , strategy_id , time_frame_id , 'short' FROM strategy_settings WHERE combination_id = (SELECT MAX(combination_id) FROM `strategy_settings` WHERE strategy_id IN (SELECT strategy_id FROM strategies WHERE internal_account_id = :internal_account_id))");
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Add default strategies for new / pre 1.0 accounts
+     */
+
+    public function insert_default_strategies($internal_account_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("
+            INSERT INTO strategies (internal_account_id , strategy_name , locked)
+            VALUES 
+                (:internal_account_id , 'disabled' , 1),
+                (:internal_account_id , 'safe' , 0),
+                (:internal_account_id , 'normal' , 0),
+                (:internal_account_id , 'aggresive' , 0)
+            ");
+           
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Add default strategies for new / pre 1.0 accounts
+     */
+
+    public function insert_default_timeframes($internal_account_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("
+            INSERT INTO time_frames (internal_account_id , label , description)
+            VALUES 
+                (:internal_account_id , 'low_tf' , 'For small tf , like 15m'),
+                (:internal_account_id , 'med_tf' , 'For medium tf , like 1h'),
+                (:internal_account_id , 'high_tf' , 'For long tf , like 4h')
+            ");
+           
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+     /**
+     * Add default strategies for new / pre 1.0 accounts
+     */
+
+    public function insert_default_strategy_settings($internal_account_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("
+            INSERT INTO strategy_settings (combination_id , strategy_id , time_frame_id , type)
+            VALUES 
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'disabled') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'disabled') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'disabled') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'short') ,
+                                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'short') ,
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'short') ,
+                
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'safe') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'long') ,
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'short') ,
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'long') ,
+                
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'short') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'normal') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'long') ,
+                
+                
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1) + 1 , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'aggresive') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'low_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'aggresive') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'med_tf') , 'long') ,
+                ( (SELECT COALESCE(MAX(combination_id) , 0) FROM strategy_settings ss1)  , (SELECT strategy_id FROM strategies st1 WHERE internal_account_id = :internal_account_id AND strategy_name = 'aggresive') ,  (SELECT time_frame_id FROM time_frames WHERE internal_account_id = :internal_account_id AND label = 'high_tf') , 'long') 
+            ");
+           
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+
+
+    
 
     
     /**
@@ -154,8 +433,26 @@ class DataMapper extends Core
         catch (PDOExecption $e){
             echo $e->getMessage();
         }   
-
     }
+
+    /**
+     * Add specific bot settings per strategy
+     */
+
+    public function delete_bot_settings($strategy_id ) {
+
+        try{
+
+            $stmt = $this->dbh->prepare("DELETE FROM bot_settings WHERE strategy_id = :strategy_id");
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->execute();
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+     }
+
 
     /**
      * enable/disable account
@@ -179,7 +476,6 @@ class DataMapper extends Core
         catch (PDOExecption $e){
             echo $e->getMessage();
         }   
-
     }
     
     /**
@@ -204,7 +500,219 @@ class DataMapper extends Core
         catch (PDOExecption $e){
             echo $e->getMessage();
         }   
+    }
 
+        /**
+     * Update max active deals
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_max_active_deals_strategy($strategy_id , $deals) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE strategies SET max_active_deals = :deals WHERE strategy_id = :strategy_id");
+            $stmt->bindParam(':deals', $deals);
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Update max active deals
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_strategy_settings($combination_id , $time_frame_id , $type) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE strategy_settings SET type = :type WHERE combination_id = :combination_id AND time_frame_id = :time_frame_id");
+            $stmt->bindParam(':type', $type);
+            $stmt->bindParam(':combination_id', $combination_id);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Update max active deals
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_strat_setting_strategy($combination_id , $strategy_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE strategy_settings SET strategy_id = :strategy_id WHERE combination_id = :combination_id");
+            $stmt->bindParam(':combination_id', $combination_id);
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+
+    
+    /**
+     * Update max active deals
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_strat_name($strategy_id , $name) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE strategies SET strategy_name = :name WHERE strategy_id = :strategy_id");
+            $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Update time frame label
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_tf_label($time_frame_id , $label) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE time_frames SET label = :label WHERE time_frame_id = :time_frame_id");
+            $stmt->bindParam(':label', $label);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+        /**
+     * Update time frame description
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_tf_dscription($time_frame_id , $description) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE time_frames SET description = :description WHERE time_frame_id = :time_frame_id");
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+    }
+
+    /**
+     * Delete strategy
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function delete_strategy($strategy_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("DELETE FROM strategies WHERE strategy_id = :strategy_id");
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->execute();
+
+            $stmt = null;
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Delete strategy
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function delete_time_frame($time_frame_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("DELETE FROM time_frames WHERE time_frame_id = :time_frame_id");
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Delete strategy
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function delete_matrix_row($combination_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("DELETE FROM strategy_settings WHERE combination_id = :combination_id");
+            $stmt->bindParam(':combination_id', $combination_id);
+            $stmt->execute();
+
+            $stmt = null;
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
     }
 
     /**
@@ -229,7 +737,50 @@ class DataMapper extends Core
         catch (PDOExecption $e){
             echo $e->getMessage();
         }   
+    }
 
+    /**
+     * Update Usage of smart strategy
+     */
+    public function update_use_ss($internal_account_id , $value) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE account_settings SET use_smart_strategy = :value WHERE internal_account_id = :internal_account_id");
+            $stmt->bindParam(':value', $value);
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
+    }
+
+    /**
+     * Update Strategy
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $mode
+     * @return void
+     */
+    public function update_strategy($internal_account_id , $strategy_id) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE account_settings SET strategy_id = :strategy_id WHERE internal_account_id = :internal_account_id");
+            $stmt->bindParam(':strategy_id', $strategy_id);
+            $stmt->bindParam(':internal_account_id', $internal_account_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }   
     }
 
 

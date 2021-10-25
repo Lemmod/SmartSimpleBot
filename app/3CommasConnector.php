@@ -241,6 +241,7 @@ class threeCommas {
         return $this->signed_request('/ver1/bots/'.$id.'/update' , $params , 'PATCH');
     }
 
+
      /***************************************************\ 
      *                                                  *
      *                     GridBots                     * 
