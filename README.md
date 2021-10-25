@@ -1,12 +1,11 @@
 # SmartSimpleBot
 
-See the attached PDF's for more information
-
+All documentation has been moved to https://ssbdocs.lemmod.online/
 
 
 **Like the scripts?**
 
-All my scripts will be free to use , if you want to support me you feel free to donate!
+All my scripts will be free to use , if you want to support me you feel free to donate! =)
 
 **USDT**
 
