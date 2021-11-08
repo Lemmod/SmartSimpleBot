@@ -84,11 +84,12 @@ if($action  == 'load_strategies') {
     $table->id = 'debug_table';
     $table->width = '100%';
 
+    $direction_options = ['long_short' => 'long' , 'short_long' => 'short' , 'both' => 'both'];
+
     $table->thead()
     ->th('Label')
     ->th('Description')
-    //->th('TradingView Alert (short) <span style="color :red; font-size:0.8em;">(!) Refresh page if you have updated the label</span>')
-    //->th('TradingView Alert (long) <span style="color :red; font-size:0.8em;">(!)Refresh page if you have updated the label</span>')
+    ->th('Validation')
     ->th('Actions');
 
     foreach($time_frames as $time_frame) {
@@ -96,8 +97,7 @@ if($action  == 'load_strategies') {
         $table->tr()
         ->td('<input type="text" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'" class="tf_update" value="'.$time_frame['label'].'" />')
         ->td('<input type="text" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'" class="tf_desc_update" value="'.$time_frame['description'].'" />')
-        //->td(json_encode(['account_id' => (int)$account_info['bot_account_id'] , 'message' => 'set_tf' , 'label' => $time_frame['label'] , 'type' => 'short']))
-        //->td(json_encode(['account_id' => (int)$account_info['bot_account_id'] , 'message' => 'set_tf' , 'label' => $time_frame['label'] , 'type' => 'long']))
+        ->td('Valid for <input size="2" type="text" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'" class="tf_time_update" value="'.$time_frame['validation_time'].'" /> minutes in the direction '.create_dropdown_options($direction_options, '' , 'tf_direction_update' , 'account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'] , $time_frame['validation_direction'] , true))
         ->td('<a class="delete_time_frame_link" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'"><i class="fas fa-trash"></i> Delete </a> | <a class="force_time_frame_link" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'_side_long"> Force <span style="color: green">Long</span></a> | <a class="force_time_frame_link" id="account_'.$internal_account_id.'_timeframe_'.$time_frame['time_frame_id'].'_side_short">Force <span style="color: red">Short</span></a>');
   
     }
@@ -324,6 +324,41 @@ if($action == 'update_tf_description') {
     $dataMapper->update_tf_dscription($time_frame_id , $_REQUEST['description']);
 }
 
+/**
+ * Update time_frame validation time
+ */
+if($action == 'update_tf_valid_time') {
+
+    $explode = explode('_' , $_REQUEST['id']);
+    $internal_account_id = $explode[1];
+    $time_frame_id = $explode[3];
+
+    $account_info = $dataReader->get_account_info_internal($internal_account_id);
+
+    // Terminate if the user is nog logged in
+    check_credentials($account_info['user_id']);
+
+    $dataMapper->update_tf_valid_time($time_frame_id , $_REQUEST['min']);
+}
+
+/**
+ * Update time_frame validation direction
+ */
+if($action == 'update_tf_valid_direction') {
+
+    $explode = explode('_' , $_REQUEST['id']);
+    $internal_account_id = $explode[1];
+    $time_frame_id = $explode[3];
+
+    $account_info = $dataReader->get_account_info_internal($internal_account_id);
+
+    // Terminate if the user is nog logged in
+    check_credentials($account_info['user_id']);
+
+    $dataMapper->update_tf_valid_direction($time_frame_id , $_REQUEST['direction']);
+}
+
+
 
 if($action == 'update_strat_setting_mode') {
 
@@ -433,7 +468,7 @@ if($action == 'load_bots_strategy') {
 
     echo '<input type="submit" name="submit_form" class="submit_mb" value="Save all changes">';
     echo '<input type="hidden" name="account_id" value="'.$internal_account_id.'"/>';
-    echo '<input type="text" name="strategy_id" value="'.$strategy_id.'"/>';
+    echo '<input type="hidden" name="strategy_id" value="'.$strategy_id.'"/>';
    
          
     $table->thead()
@@ -498,7 +533,7 @@ if($action == 'load_bots_strategy') {
 
 
         $table->tr()
-            ->td($bot['id'].' ('.$bot['name'].')')
+            ->td($bot['name'])
             ->td($bot['pairs'][0])
             ->td(create_dropdown_options(['limit' , 'market'] , 'so_type_bots_'.$bot['id'] , 'so_type_bots' , 'bot_'.$bot['id'] , $bot_setting['start_order_type']))
             ->td(create_input_number('max_so_bots_'.$bot['id'] , 'max_so_bots' , 'bot_'.$bot['id'] , $bot_setting['max_safety_orders']))

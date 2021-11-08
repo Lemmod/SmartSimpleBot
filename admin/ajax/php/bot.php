@@ -158,7 +158,7 @@ if($action == 'load_bots') {
         }
 
         $table->tr()
-            ->td($bot['id'].' ('.$bot['name'].')')
+            ->td($bot['name'])
             ->td($bot['pairs'][0])
             ->td(create_dropdown_options(['limit' , 'market'] , 'so_type_bots_'.$bot['id'] , 'so_type_bots' , 'bot_'.$bot['id'] , $bot['start_order_type']))
             ->td(create_input_number('max_so_bots_'.$bot['id'] , 'max_so_bots' , 'bot_'.$bot['id'] , $bot['max_safety_orders']))

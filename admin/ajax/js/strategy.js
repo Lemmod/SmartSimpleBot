@@ -65,7 +65,6 @@ function a_update_tf_label(id , label)
     return false;
 }
 
-
 // Set active deals strategy
 function a_update_tf_description(id , description)
 {
@@ -82,6 +81,39 @@ function a_update_tf_description(id , description)
     
     return false;
 }
+
+// Set active deals strategy
+function a_update_tf_valid_time(id , min)
+{
+    $.ajax({
+        type: 'post',
+        url: 'ajax/php/strategy.php?action=update_tf_valid_time&id=' + id + '&min=' + min,
+        global: false,
+        success: function (response) {
+            if (response == 'ERROR_NOT_LOGGED_IN') {
+                location.href = 'logout.php?response=incorrect_ajax_call';
+            }
+        }
+    });
+    
+    return false;
+}
+
+function a_update_tf_valid_direction(id , direction)
+{
+    $.ajax({
+        type: 'post',
+        url: 'ajax/php/strategy.php?action=update_tf_valid_direction&id=' + id + '&direction=' + direction,
+        success: function (response) {
+            if (response == 'ERROR_NOT_LOGGED_IN') {
+                location.href = 'logout.php?response=incorrect_ajax_call';
+            }
+        }
+    });
+    
+    return false;
+}
+
 
 
 // Load all bots strategies
@@ -457,7 +489,7 @@ $(document).on("change mouseout", '.strat_update', function() {
 
 });
 
-// Link to Delete account
+// Link to update time frame label
 $(document).on("change mouseout", '.tf_update', function() { 
     
     var id = $(this).attr("id");
@@ -467,13 +499,32 @@ $(document).on("change mouseout", '.tf_update', function() {
 
 });
 
-// Link to Delete account
+
+// Link to update time frame description
 $(document).on("change mouseout", '.tf_desc_update', function() { 
     var id = $(this).attr("id");
     var name = $(this).val();
  
     return a_update_tf_description(id , name);
 
+});
+
+// Link to Delete account
+$(document).on("change mouseout", '.tf_time_update', function() { 
+    
+    var id = $(this).attr("id");
+    var min = $(this).val();
+
+    return a_update_tf_valid_time(id , min);
+
+});
+
+// Link to update max active deals per strategy
+$(document).on("change", '.tf_direction_update', function() { 
+    var id = $(this).attr("id");
+    var direction = $(this).val();
+
+    return a_update_tf_valid_direction(id , direction);
 });
 
 // Link to bot mode
