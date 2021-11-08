@@ -5,7 +5,7 @@ All documentation has been moved to https://ssbdocs.lemmod.online/
 
 **Like the scripts?**
 
-All my scripts will be free to use , if you want to support me you feel free to donate! =)
+SSB is free to use , if you want to support me you feel free to donate! =)
 
 **USDT**
 
