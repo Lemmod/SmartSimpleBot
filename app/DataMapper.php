@@ -649,6 +649,55 @@ class DataMapper extends Core
         }  
     }
 
+      /**
+     * Update time frame description
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_tf_valid_time($time_frame_id , $min) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE time_frames SET validation_time = :validation_time WHERE time_frame_id = :time_frame_id");
+            $stmt->bindParam(':validation_time', $min);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+    }
+
+          /**
+     * Update time frame description
+     *
+     * @param  mixed $internal_account_id
+     * @param  mixed $setting
+     * @return void
+     */
+    public function update_tf_valid_direction($time_frame_id , $direction) {
+
+        try{
+               
+            $stmt = $this->dbh->prepare("UPDATE time_frames SET validation_direction = :validation_direction WHERE time_frame_id = :time_frame_id");
+            $stmt->bindParam(':validation_direction', $direction);
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+
+            $stmt = null;
+
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }  
+    }
+
+
     /**
      * Delete strategy
      *

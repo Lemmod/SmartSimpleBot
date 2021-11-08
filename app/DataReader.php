@@ -302,6 +302,24 @@ class DataReader extends Core
         }
     }
 
+    public function get_time_frame_last_update($time_frame_id) {
+
+        try{
+
+            $stmt = $this->dbh->prepare('SELECT * FROM time_frame_status WHERE time_frame_id = :time_frame_id ORDER BY timestamp DESC LIMIT 1');
+            $stmt->bindParam(':time_frame_id', $time_frame_id);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $stmt = null;
+
+            return $result['timestamp'];
+        }
+        catch (PDOExecption $e){
+            echo $e->getMessage();
+        }
+    }
+
     public function get_strategy_settings($internal_account_id) {
 
         try{
