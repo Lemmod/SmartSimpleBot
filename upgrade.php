@@ -81,6 +81,8 @@ ALTER TABLE `account_settings` ADD COLUMN IF NOT EXISTS `strategy_id` int NOT NU
 ALTER TABLE `account_settings` ADD COLUMN IF NOT EXISTS `use_smart_strategy` tinyint(1) NOT NULL DEFAULT '1';
 ALTER TABLE `account_settings` ADD KEY IF NOT EXISTS `account_settings_account_delete` (`internal_account_id`);
 
+ALTER TABLE `time_frames` ADD COLUMN IF NOT EXISTS `validation_time` int(12) NOT NULL DEFAULT 0;
+ALTER TABLE `time_frames` ADD COLUMN IF NOT EXISTS `validation_direction` varchar(255) NOT NULL DEFAULT 'long_short';
 
 ALTER TABLE `account_settings`
   ADD CONSTRAINT  `account_settings_account_delete` FOREIGN KEY IF NOT EXISTS (`internal_account_id`) REFERENCES `accounts` (`internal_account_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -112,7 +114,7 @@ foreach($all_accounts as $account_wrapper) {
     $strategies = $dataReader->get_strategies($account_wrapper['internal_account_id']);
 
     if (count($strategies) > 0) {
-        echo 'Strategies allready found , not updating...<br />';
+        echo 'Strategies allready found , no need to update specific account settings.<br />';
     } else {
         // Add default strategies
         $dataMapper->insert_default_strategies($account_wrapper['internal_account_id']);
@@ -123,6 +125,6 @@ foreach($all_accounts as $account_wrapper) {
     }
 }
 
-echo 'Looks like everything is updated!';
+echo '<span style="color : green">Looks like everything is updated , included validation time.</span>';
 
 ?>
