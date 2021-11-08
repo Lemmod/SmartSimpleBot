@@ -269,13 +269,15 @@ if($action == "create_tables") {
         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
     CREATE TABLE IF NOT EXISTS `time_frames` (
-        `time_frame_id` int NOT NULL AUTO_INCREMENT,
-        `internal_account_id` int NOT NULL,
+        `time_frame_id` int(11) NOT NULL AUTO_INCREMENT,
+        `internal_account_id` int(11) NOT NULL,
         `label` text NOT NULL,
+        `validation_time` int(12) NOT NULL DEFAULT 0,
+        `validation_direction` varchar(255) NOT NULL DEFAULT 'long_short',
         `description` text NOT NULL,
         PRIMARY KEY (`time_frame_id`),
         KEY `time_frames_account_delete` (`internal_account_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+        ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 
     CREATE TABLE IF NOT EXISTS `time_frame_status` (
         `status_id` int NOT NULL AUTO_INCREMENT,

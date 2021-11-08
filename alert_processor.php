@@ -30,9 +30,6 @@ $dataReader = new DataReader();
 $all_accounts = $dataReader->get_all_accounts();
 $unprocessed_alerts = $dataReader->get_unprocessed_alerts(MAX_TIME_TO_CHECK_ALERT);
 
-
-
-
 $total_alerts = count($unprocessed_alerts);
 $errors_3c = 0;
 $calls_3c = 0;
@@ -49,8 +46,6 @@ foreach($all_accounts as $account_wrapper) {
 
     $account_info = $dataReader->get_account_info($account_wrapper['bot_account_id']);
     $account_settings = $dataReader->get_account_settings($account_info['internal_account_id']);
-
-
 
     /**
      * 
@@ -266,6 +261,46 @@ foreach($all_accounts as $account_wrapper) {
                         $dataMapper->insert_log($data['account_id'] , $data['bot_id'] , $data['pair'] , 'Deal not added , max active deals hit ( Active : '.$count_active_deals_on_3c.' , Max : '.$account_settings['max_active_deals'].' )');
                     }
                 }
+            }
+        }
+    }
+
+    // Check validation time and direction. We want to check this after all alerts have been parsed and build a margin of ~1min to make sure new timeframes are set
+    $time_frames = $dataReader->get_time_frames($account_wrapper['internal_account_id']);
+
+    echo '<h1>'.$account_wrapper['bot_account_id'].'</h1>';
+
+    echo 'Current date : '.date("Y-m-d H:i:s");
+
+    $current_time = date("Y-m-d H:i:s");
+    foreach($time_frames as $tf) {
+        $tf_status = $dataReader->get_time_frame_status($tf['time_frame_id']);
+        $tf_last_update = $dataReader->get_time_frame_last_update($tf['time_frame_id']);
+
+        $minutes_valid = $tf['validation_time'];
+
+        // Calculate the valid till date , for processing time add another 30 seconds to prevent false positive
+        $valid_till = date('Y-m-d H:i:s', strtotime($tf_last_update. ' + '.$minutes_valid.' minutes + 30 seconds'));
+
+        echo '<h2>'.$tf['label'].'</h2>';
+
+        echo 'Status : '.$tf_status.'<br />';
+        echo ' Last update : '.$tf_last_update.'<br />';
+        echo ' Valid till : '.$valid_till.'<br />';
+
+        // Only check if the valid time is set. When the time has expired we need to update settings
+        if ($current_time > $valid_till && $minutes_valid !=0) {
+            echo '<span style="color : red"> No longer valid</span><br />';
+
+            // Action from long to short , only need to change when the current status is long
+            if ( in_array($tf['validation_direction'] , array('long_short','both')) && $tf_status == 'long') {
+                $dataMapper->insert_timeframe_status($account_info['internal_account_id'] , $tf['time_frame_id'] , 'short');
+                $dataMapper->insert_log($account_wrapper['bot_account_id'] , 0 , '' , 'Validation check : Added status for '.$tf['label'].' with type short , pattern no longer valid base on validation time');
+            }
+
+            if ( in_array($tf['validation_direction'] , array('short_long','both')) && $tf_status == 'short') {
+                $dataMapper->insert_timeframe_status($account_info['internal_account_id'] , $tf['time_frame_id'] , 'long');
+                $dataMapper->insert_log($account_wrapper['bot_account_id'] , 0 , '' , 'Validation check : Added status for '.$tf['label'].' with type long , pattern no longer valid base on validation time');
             }
         }
     }
