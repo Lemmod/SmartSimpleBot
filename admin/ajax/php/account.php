@@ -136,7 +136,7 @@ if($action == 'load_all_accounts') {
         $table->tr()
         ->td($response['3c_id'])
         ->td($response['internal_name'])
-        ->td(create_dropdown_number_with_id(0 , 20 , 'mad_dropdown' , 'mad_dropdown' , 'account_'.$response['internal_id'] , $response['mad']))
+        ->td(create_dropdown_number_with_id(0 , 100 , 'mad_dropdown' , 'mad_dropdown' , 'account_'.$response['internal_id'] , $response['mad']))
         //->td(create_dropdown_number_with_id(5 , 200 , 'bo_size' , 'bo_size' , 'account_'.$response['internal_id'] , $response['bo_size']))
         ->td('<a class="manage_bots_link" id="mbots_'.$response['internal_id'].'"><i class="fas fa-robot"></i> Manage bots </a>')
         ->td($switch)

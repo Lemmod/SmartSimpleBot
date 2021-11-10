@@ -62,7 +62,7 @@ if($action  == 'load_strategies') {
             $table->td('All alerts will be disabled. No change on 3commas will be made for this setting.');
         } else {  
             $table->td('<input type="text" id="account_'.$internal_account_id.'_strat_'.$strategy['strategy_id'].'" class="strat_update" value="'.$strategy['strategy_name'].'" />');
-            $table->td(create_dropdown_number_with_id(0 , 20 , 'mad_dropdown_strategy' , 'mad_dropdown_strategy' , 'account_'.$internal_account_id.'_strategy_'.$strategy['strategy_id'] , $strategy['max_active_deals']));         
+            $table->td(create_dropdown_number_with_id(0 , 100 , 'mad_dropdown_strategy' , 'mad_dropdown_strategy' , 'account_'.$internal_account_id.'_strategy_'.$strategy['strategy_id'] , $strategy['max_active_deals']));         
             $table->td('<a class="manage_bots_strategy_link" id="mbots_'.$internal_account_id.'_strat_'.$strategy['strategy_id'].'"><i class="fas fa-robot"></i> Manage bots </a> | <a class="delete_strategy_link" id="account_'.$internal_account_id.'_strat_'.$strategy['strategy_id'].'"><i class="fas fa-trash"></i> Delete </a> '.$message);
         } 
 
