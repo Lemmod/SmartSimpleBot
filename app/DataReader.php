@@ -143,9 +143,9 @@ class DataReader extends Core
         try{
 
             if ($system_message == 0) {
-                $stmt = $this->dbh->prepare('SELECT * FROM logbook WHERE account_id = :bot_account_id AND pair != "" AND timestamp >= :start_time ORDER BY log_id');
+                $stmt = $this->dbh->prepare('SELECT * , unix_timestamp(timestamp) as ts FROM logbook WHERE account_id = :bot_account_id AND pair != "" AND timestamp >= :start_time ORDER BY log_id');
             } else {
-                $stmt = $this->dbh->prepare('SELECT * FROM logbook WHERE account_id = :bot_account_id AND pair = "" AND timestamp >= :start_time ORDER BY log_id');
+                $stmt = $this->dbh->prepare('SELECT * , unix_timestamp(timestamp) as ts FROM logbook WHERE account_id = :bot_account_id AND pair = "" AND timestamp >= :start_time ORDER BY log_id');
             }
                 $stmt->bindParam(':bot_account_id', $bot_account_id);
                 $stmt->bindParam(':start_time', $start_time);
@@ -167,7 +167,7 @@ class DataReader extends Core
 
         try{
 
-            $stmt = $this->dbh->prepare('SELECT * FROM debug_calls WHERE time >= :start_time ORDER BY time DESC');
+            $stmt = $this->dbh->prepare('SELECT * , unix_timestamp(time) as ts_hour FROM debug_calls WHERE time >= :start_time ORDER BY time DESC');
             $stmt->bindParam(':start_time', $start_time);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -306,14 +306,14 @@ class DataReader extends Core
 
         try{
 
-            $stmt = $this->dbh->prepare('SELECT * FROM time_frame_status WHERE time_frame_id = :time_frame_id ORDER BY timestamp DESC LIMIT 1');
+            $stmt = $this->dbh->prepare('SELECT * , unix_timestamp(timestamp) as ts  FROM time_frame_status WHERE time_frame_id = :time_frame_id ORDER BY timestamp DESC LIMIT 1');
             $stmt->bindParam(':time_frame_id', $time_frame_id);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $stmt = null;
 
-            return $result['timestamp'];
+            return date("Y-m-d H:i:s" , $result['ts']);
         }
         catch (PDOExecption $e){
             echo $e->getMessage();

@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-date_default_timezone_set('Europe/Amsterdam');
+//date_default_timezone_set('Europe/Amsterdam');
 // We need to use sessions, so you should always start sessions using the below code.
 session_start();
 // If the user is not logged in redirect to the login page...
@@ -15,7 +15,7 @@ include ('../app/Config.php');
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 		
 		<title>Smart Simple Bot</title>
 		
@@ -23,6 +23,7 @@ include ('../app/Config.php');
 		<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
         <link href="css/style.css" rel="stylesheet" type="text/css">
+		<!-- <link href="css/dark_mode.css" rel="stylesheet" type="text/css"> Not completed yet -->
 	
 		<script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.0.0/jq-3.2.1/dt-1.10.16/r-2.2.1/datatables.min.js"></script>
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>	
@@ -105,6 +106,8 @@ include ('../app/Config.php');
 			</div>
 		</nav>
 
+		
+
 		<div class="content">
 			<?php 
 			if (DEMO_MODE == 1) { 
@@ -176,6 +179,10 @@ include ('../app/Config.php');
 
 				<!-- Strategy overview -->
 				<div class="strategies hide">
+                </div>
+
+				<!-- Deals overview -->
+				<div class="deals hide">
                 </div>
 
 			</div>

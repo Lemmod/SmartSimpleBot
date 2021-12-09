@@ -14,7 +14,7 @@ body {
 a {
     cursor:pointer;
     text-decoration: underline !important;
-    color: black !important;
+    color: #ccc !important;
 }
 
 a.debug_log_link {
@@ -23,58 +23,6 @@ a.debug_log_link {
 
 a.logout_link {
     color: #c1c4c8 !important;
-}
-
-.login {
-    width: 400px;
-    background-color: #ffffff;
-    box-shadow: 0 0 9px 0 rgba(0, 0, 0, 0.3);
-    margin: 100px auto;
-}
-.login h1 {
-    text-align: center;
-    color: #5b6574;
-    font-size: 24px;
-    padding: 20px 0 20px 0;
-    border-bottom: 1px solid #dee0e4;
-}
-.login form {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding-top: 20px;
-}
-
-.login form label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50px;
-    height: 50px;
-    background-color: #3274d6;
-    color: #ffffff;
-}
-.login form input[type="password"], .login form input[type="text"] {
-    width: 310px;
-    height: 50px;
-    border: 1px solid #dee0e4;
-    margin-bottom: 20px;
-    padding: 0 15px;
-}
-.login form input[type="submit"] {
-    width: 100%;
-    padding: 15px;
-   margin-top: 20px;
-    background-color: #3274d6;
-    border: 0;
-    cursor: pointer;
-    font-weight: bold;
-    color: #ffffff;
-    transition: background-color 0.2s;
-}
-.login form input[type="submit"]:hover {
-  background-color: #2868c7;
-    transition: background-color 0.2s;
 }
 
 .message {
@@ -113,7 +61,7 @@ a.logout_link {
 .navtop div a {
 	padding: 0 20px;
 	text-decoration: none;
-	color: #c1c4c8;
+	color: #ccc;
 	font-weight: bold;
 }
 .navtop div a i {
@@ -123,7 +71,7 @@ a.logout_link {
 	color: #eaebed;
 }
 body.loggedin {
-	background-color: #f3f4f7;
+	background-color: #333;
 }
 .content {
 	width: 90%;
@@ -134,7 +82,7 @@ body.loggedin {
 	padding: 25px 0;
 	font-size: 22px;
 	border-bottom: 1px solid #e0e0e3;
-	color: #4a536e;
+	color: #ccc;
     margin-bottom : 10px;
 }
 
@@ -142,7 +90,7 @@ body.loggedin {
 	margin: 0;
 	padding: 12px 0;
 	font-size: 18px;
-    color: #4a536e;
+    color: #ccc;
     margin-bottom : 10px;
 }
 
@@ -150,14 +98,14 @@ body.loggedin {
 	margin: 0;
 	padding: 0;
 	font-size: 13px;
-    color: #4a536e;
+    color: #ccc;
     margin-bottom : 10px;
 }
 .content > p, .content > div {
 	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
 	margin: 25px 0;
 	padding: 25px;
-	background-color: #fff;
+	background-color: #454545;
 }
 
 .content > #accounts {
@@ -170,7 +118,7 @@ body.loggedin {
 }
 .content > p table td:first-child, .content > div table td:first-child {
 	font-weight: bold;
-	color: #4a536e;
+	color: #ccc;
 	padding-right: 15px;
 }
 .content > div p {
@@ -211,8 +159,12 @@ body.loggedin {
     padding: 25px 0;
     font-size: 22px;
     border-top: 1px solid #e0e0e3;
-    color: #4a536e;
+    color: #ccc;
     margin-bottom : 10px;
+}
+
+.form-control {
+    color: #ccc !important;
 }
 
 label {
@@ -247,15 +199,15 @@ select , input {
     -moz-padding-end: 20px;
     -webkit-padding-start: 2px;
     -moz-padding-start: 2px;
-    background-color: #EEE; /* Fallback color if gradients are not supported */
-    background-image: -webkit-linear-gradient(top, #EEE, #CCC);
-    background-image: -moz-linear-gradient(top, #EEE, #CCC);
-    background-image: -ms-linear-gradient(top, #EEE, #CCC);
-    background-image: -o-linear-gradient(top, #EEE, #CCC); 
+    background-color: #333; /* Fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, #333, #000);
+    background-image: -moz-linear-gradient(top, #333, #000);
+    background-image: -ms-linear-gradient(top, #333, #000);
+    background-image: -o-linear-gradient(top, #333, #000); 
     border: 1px solid #AAA;
     border-radius: 2px;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-    color: #555;
+    color: #ccc;
     font-size: inherit;
     margin: 0;
     overflow: hidden;
@@ -380,6 +332,11 @@ select , input {
   }
   
   .slider.round:before {
-    border-radius: 50%;}
+    border-radius: 50%;
+}
+
+tr {
+    border-color : red;
+}
 
 

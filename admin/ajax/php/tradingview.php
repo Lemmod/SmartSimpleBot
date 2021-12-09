@@ -122,6 +122,7 @@ if($action == 'load_tv_alerts') {
         ->th('Created :')
         ->th('Pair :')
         ->th('Alert');
+        //->th('');
 
     foreach ($bots as $bot) {
 
@@ -145,9 +146,16 @@ if($action == 'load_tv_alerts') {
             ->td($bot['id']. ' ('.$bot['name'].')')
             ->td($bot['created_at'])
             ->td($bot['pairs'][0])
-            ->td('<span class="copy_text">'.json_encode($result).'</span>');
+            ->td(json_encode($result));
+            //->td('<button onclick="copyText(\''.json_encode($result).'\')" id="'.$bot['id'].'">Copy</button>');
     }
 
     echo $table->getTable();
 
 }
+
+?>
+
+
+
+

@@ -32,7 +32,7 @@ if($action == 'load_logbook') {
     check_credentials($account_info['user_id']);  
 
     $log_data = $dataReader->get_logbook($account_info['bot_account_id'] , 1);
-    $log_data_system = $dataReader->get_logbook($account_info['bot_account_id'] , 1 , 1);
+    $log_data_system = $dataReader->get_logbook($account_info['bot_account_id'] , 7 , 1);
 
     echo '<h2> Deal messages </h2>';
 
@@ -48,7 +48,7 @@ if($action == 'load_logbook') {
 
     foreach($log_data as $log) {
         $table->tr()
-        ->td($log['timestamp'])
+        ->td(date("Y-m-d H:i:s",$log['ts']))
         ->td($log['pair'])
         ->td($log['message']);
 
@@ -69,7 +69,7 @@ if($action == 'load_logbook') {
 
     foreach($log_data_system as $log) {
         $table->tr()
-        ->td($log['timestamp'])
+        ->td(date("Y-m-d H:i:s",$log['ts']))
         ->td($log['message']);
 
     }
@@ -103,7 +103,7 @@ if($action == 'load_debuglog') {
 
     foreach($log_data as $log) {
         $table->tr()
-        ->td($log['time'])
+        ->td(date("Y-m-d H:i:s",$log['ts_hour']))
         ->td($log['jobs'])
         ->td($log['alerts'])
         ->td($log['calls'])

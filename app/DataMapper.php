@@ -228,8 +228,6 @@ class DataMapper extends Core
             $stmt->bindParam(':type', $type);
             $stmt->execute();
 
-            pr($stmt);
-
             $stmt = null;
          
         }

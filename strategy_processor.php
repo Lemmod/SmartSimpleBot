@@ -148,7 +148,11 @@ foreach($all_accounts as $account_wrapper) {
                     try {
                         $update = $xcommas->update_bot($bot['id'] , $data);
                     } catch (Exception $e) {
-                        $dataMapper->insert_log($account_wrapper['bot_account_id'] , 0 , '' , 'Not able to update bot setting for '.$bot['name'].' with message : '.$e->getMessage());
+
+                        // If the update fails we want to disable the bot , in this way we are sure we don't overleverage
+                        $xcommas->disable_bot($bot['id']);
+
+                        $dataMapper->insert_log($account_wrapper['bot_account_id'] , 0 , '' , 'Not able to update bot settings and disabling bot for '.$bot['name'].' with message : '.$e->getMessage());
                         echo $e->getMessage();
                     }    
                 }

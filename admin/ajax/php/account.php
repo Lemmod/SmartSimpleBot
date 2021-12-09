@@ -45,15 +45,16 @@ if($action == 'load_all_accounts') {
         try {
             $stats = $xcommas->get_bot_stats(['account_id' => $account['bot_account_id']]);
             $deals = $xcommas->get_deals(['account_id' => $account['bot_account_id'] , 'scope' => 'active']);
-
-            $stats_usdt = '$ '.number_format($stats['today_stats']['USD'],2); ;
+            $stats_usdt = '$ '.number_format($stats['profits_in_usd']['today_usd_profit'],2); 
             $deals_running = count($deals);
         } catch (Exception $e) {
 
             $stats_usdt = '-error-';
             $deals_running = '-error-';
         } 
-        
+
+        //$account_balance = $xcommas->get_account_balances($account['bot_account_id']);
+       
         $account_response[$i]['internal_id'] = $account['internal_account_id'];
         $account_response[$i]['3c_id'] = $account['bot_account_id'];
         $account_response[$i]['internal_name'] = $account['account_name'];
@@ -64,6 +65,14 @@ if($action == 'load_all_accounts') {
         $account_response[$i]['use_ss'] = $settings['use_smart_strategy'];
         $account_response[$i]['daily_usdt_profit'] = $stats_usdt;
         $account_response[$i]['open_deals'] = $deals_running;
+
+        //$account_response[$i]['invested'] = $stats['profits_in_usd']['funds_locked_in_active_deals'];
+        //$account_response[$i]['unrealized_pnl'] = $stats['profits_in_usd']['active_deals_usd_profit'];
+        //$account_response[$i]['current_balance'] = $account_balance['usd_amount'];
+        // Calculate expore = Invested (locked funds) / Total wallet (current balance + unrealized PnL)
+        //$account_response[$i]['exposure'] = $stats['profits_in_usd']['funds_locked_in_active_deals'] / ( $account_balance['usd_amount'] + ($stats['profits_in_usd']['active_deals_usd_profit'] * -1));
+
+
 
         // Only show one account in Demo mode
         if (DEMO_MODE) {
@@ -93,6 +102,7 @@ if($action == 'load_all_accounts') {
         ->th('Delete')
         ->th('Open deals')
         ->th('Daily profit');
+        //->th('Risk / Exposure');
         
    
     foreach ($account_response as $response) {
@@ -148,8 +158,14 @@ if($action == 'load_all_accounts') {
         //->td('<a class="telegram_settings_link" id="account_'.$response['internal_id'].'"><i class="fas fa-comment-dots"></i>  Telegram settings</a> | <a class="test_message_link" id="sentmsg_'.$response['internal_id'].'"><i class="fas fa-paper-plane"></i> Test msg.</a>')
         ->td('<a class="logbook_link" id="account_'.$response['internal_id'].'"><i class="fas fa-book"></i>  Logbook</a>')
         ->td('<a class="delete_account_link" id="account_'.$response['internal_id'].'"><i class="fas fa-trash"></i>  Delete</a>')
-        ->td($response['open_deals'])
+        ->td('<a class="load_deals_link" id="strats_'.$response['internal_id'].'">'.$response['open_deals'].'</a>')
         ->td($response['daily_usdt_profit']);
+        // ->td('<span style="font-size : 0.9em">
+        //     Invested : $ '.number_format($response['invested'],2) . '<br /> 
+        //     Unrealized PnL : $ '.number_format($response['unrealized_pnl'],2) . '<br /> 
+        //     Balance : $ '.number_format($response['current_balance'],2) .'<br /> 
+        //     Exposure : '.number_format($response['exposure'],2)
+        //     .'</span>');
     }
 
     echo $table->getTable();

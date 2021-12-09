@@ -130,6 +130,10 @@ class threeCommas {
         return $this->signed_request('/ver1/accounts/'.$id);
     }
 
+    function get_account_balances($id) {
+        return $this->signed_request('/ver1/accounts/'.$id.'/load_balances' , [] , 'POST');
+    }
+
      /***************************************************\ 
      *                                                  *
      *                       Bots                       * 
@@ -287,6 +291,22 @@ class threeCommas {
      function get_deals ($params = []) {
         return $this->signed_request('/ver1/deals' , $params , 'GET');
      }
+
+     function update_max_so ($id , $params = []) {
+        return $this->signed_request('/ver1/deals/'.$id.'/update_max_safety_orders' , $params , 'POST');
+     }
+
+
+     function cancel_order($id , $params = []) {
+        return $this->signed_request('/ver1/deals/'.$id.'/cancel_order' , $params , 'POST');
+     }
+
+     function get_deal_safety_orders($id) {
+        return $this->signed_request('/ver1/deals/'.$id.'/market_orders' , [] , 'GET');
+     }
+
+
+  
 
     /***************************************************\ 
      *                                                  *

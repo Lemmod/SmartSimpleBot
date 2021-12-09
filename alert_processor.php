@@ -80,7 +80,7 @@ foreach($all_accounts as $account_wrapper) {
                     $count_active_deals_on_3c = count($deals);
 
                     $active_deal_bot_ids = array();
-		    $active_deal_pairs = array();
+		            $active_deal_pairs = array();
                     foreach($deals as $deal) {
                         $active_deal_bot_ids[] = $deal['bot_id'];
                         $active_deal_pairs[] = ['bot_id' => $deal['bot_id'] , 'pair' => $deal['pair']];
@@ -268,10 +268,6 @@ foreach($all_accounts as $account_wrapper) {
     // Check validation time and direction. We want to check this after all alerts have been parsed and build a margin of ~1min to make sure new timeframes are set
     $time_frames = $dataReader->get_time_frames($account_wrapper['internal_account_id']);
 
-    echo '<h1>'.$account_wrapper['bot_account_id'].'</h1>';
-
-    echo 'Current date : '.date("Y-m-d H:i:s");
-
     $current_time = date("Y-m-d H:i:s");
     foreach($time_frames as $tf) {
         $tf_status = $dataReader->get_time_frame_status($tf['time_frame_id']);
@@ -282,16 +278,9 @@ foreach($all_accounts as $account_wrapper) {
         // Calculate the valid till date , for processing time add another 30 seconds to prevent false positive
         $valid_till = date('Y-m-d H:i:s', strtotime($tf_last_update. ' + '.$minutes_valid.' minutes + 30 seconds'));
 
-        echo '<h2>'.$tf['label'].'</h2>';
-
-        echo 'Status : '.$tf_status.'<br />';
-        echo ' Last update : '.$tf_last_update.'<br />';
-        echo ' Valid till : '.$valid_till.'<br />';
-
         // Only check if the valid time is set. When the time has expired we need to update settings
         if ($current_time > $valid_till && $minutes_valid !=0) {
-            echo '<span style="color : red"> No longer valid</span><br />';
-
+ 
             // Action from long to short , only need to change when the current status is long
             if ( in_array($tf['validation_direction'] , array('long_short','both')) && $tf_status == 'long') {
                 $dataMapper->insert_timeframe_status($account_info['internal_account_id'] , $tf['time_frame_id'] , 'short');
@@ -308,11 +297,6 @@ foreach($all_accounts as $account_wrapper) {
     $xcommas_main = null;
 }
 
-/**
- * 
- * Used for debug
- * 
- */
 $time = microtime();
 $time = explode(' ', $time);
 $time = $time[1] + $time[0];
