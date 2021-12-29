@@ -1,7 +1,11 @@
 <?php
+/*****
+
+(c) 2021 - Lemmod
+
+*/
+
 error_reporting(E_ALL);
-//date_default_timezone_set('Europe/Amsterdam');
-// We need to use sessions, so you should always start sessions using the below code.
 session_start();
 // If the user is not logged in redirect to the login page...
 if (!isset($_SESSION['loggedin'])) {

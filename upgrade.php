@@ -1,17 +1,14 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 /*****
 
-Remember , script is under construction and not documented but the basics.
+(c) 2021 - Lemmod
 
-Use this script at your own risk!
-
-It won't contain all possibilitys from the 3c API , mainly used for updating multiple bots at once
-
-(c) 2021 - MileCrypto (Lemmod)
+Needed for new database settings when upgrading script , will notice when this need to be run
 
 */
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 
 $time = microtime();
 $time = explode(' ', $time);

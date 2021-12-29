@@ -1,14 +1,7 @@
 <?php
-
 /*****
 
-Remember , script is under construction and not documented but the basics.
-
-Use this script at your own risk!
-
-It won't contain all possibilitys from the 3c API , mainly used for updating multiple bots at once
-
-(c) 2021 - MileCrypto (Lemmod)
+(c) 2021 - Lemmod
 
 */
 

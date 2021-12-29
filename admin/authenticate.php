@@ -1,4 +1,9 @@
 <?php
+/*****
+
+(c) 2021 - Lemmod
+
+*/
 session_start();
 // Change this to your connection info.
 include ('../app/Config.php');

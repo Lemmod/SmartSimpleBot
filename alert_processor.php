@@ -1,16 +1,12 @@
 <?php
-error_reporting(E_ERROR);
 /*****
 
-Remember , script is under construction and not documented but the basics.
+(c) 2021 - Lemmod
 
-Use this script at your own risk!
-
-It won't contain all possibilitys from the 3c API , mainly used for updating multiple bots at once
-
-(c) 2021 - MileCrypto (Lemmod)
+Process the alerts from alert_handler.php. Run this script for example every 5 seconds
 
 */
+error_reporting(E_ERROR);
 
 $time = microtime();
 $time = explode(' ', $time);

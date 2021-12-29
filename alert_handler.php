@@ -1,17 +1,15 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 /*****
 
-Remember , script is under construction and not documented but the basics.
+(c) 2021 - Lemmod
 
-Use this script at your own risk!
-
-It won't contain all possibilitys from the 3c API , mainly used for updating multiple bots at once
-
-(c) 2021 - MileCrypto (Lemmod)
+Handles all the alerts directly from TradingView
 
 */
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 include (__DIR__.'/app/Config.php');
 include (__DIR__.'/app/Core.php');
 include (__DIR__.'/app/DataMapper.php');

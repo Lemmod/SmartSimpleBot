@@ -1,6 +1,12 @@
 <?php
+/*****
+
+(c) 2021 - Lemmod
+
+Shows all open deals per account on 3Commas (doesn't include exchange only deals)
+
+*/
 error_reporting(E_ERROR);
-// We need to use sessions, so you should always start sessions using the below code.
 session_start();
 // If the user is not logged in redirect to the login page...
 if (!isset($_SESSION['loggedin'])) {

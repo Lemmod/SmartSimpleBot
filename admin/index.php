@@ -1,4 +1,9 @@
 <?php
+/*****
+
+(c) 2021 - Lemmod
+
+*/
 
 $response = $_GET['response'];
 
